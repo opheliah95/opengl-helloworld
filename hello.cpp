@@ -1,5 +1,7 @@
+#include "include/glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
+
 
 int main()
 {
@@ -19,9 +21,14 @@ int main()
     }
     glfwMakeContextCurrent(window);
 
+    // mini modifications
+    gladLoadGL();
+    glClearColor(0.3f,0.5f,0.6f, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glfwSwapBuffers(window);
+
     while (!glfwWindowShouldClose(window))
     {
-        glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
