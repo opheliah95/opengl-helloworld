@@ -2,6 +2,19 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+
+}
+
+void redraw_window(GLFWwindow *window) {
+     // Rendering code goes here
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glfwSwapBuffers(window);
+}
+
 
 int main()
 {
@@ -12,7 +25,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // create a window
-    GLFWwindow *window = glfwCreateWindow(300, 400, "Hello OpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1920,1080, "Hello OpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create window" << std::endl;
@@ -23,16 +36,17 @@ int main()
 
     // mini modifications
     gladLoadGL();
-    glClearColor(0.3f,0.5f,0.6f, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glfwSwapBuffers(window);
+    glViewport(0,0,1920,1080);
+    redraw_window(window);
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+        redraw_window(window);
     }
 
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 }
+
