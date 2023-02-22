@@ -2,19 +2,13 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void redraw_window(GLFWwindow *window)
 {
-    glViewport(0, 0, width, height);
-
-}
-
-void redraw_window(GLFWwindow *window) {
-     // Rendering code goes here
+    // Rendering code goes here
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glfwSwapBuffers(window);
 }
-
 
 int main()
 {
@@ -25,7 +19,8 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // create a window
-    GLFWwindow *window = glfwCreateWindow(1920,1080, "Hello OpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1920, 1080, "Hello OpenGL", NULL, NULL);
+
     if (window == NULL)
     {
         std::cout << "Failed to create window" << std::endl;
@@ -34,9 +29,50 @@ int main()
     }
     glfwMakeContextCurrent(window);
 
-    // mini modifications
+    // init application
     gladLoadGL();
-    glViewport(0,0,1920,1080);
+
+    // trangle we want to render
+    float points[] = {
+        0.0f, 0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f};
+
+    // create VBO to store point information into buffer
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind the vbo buffer
+
+    // // send the buffer to graphics card
+    // // step 1: initialize a buffer store to store array buffer data with frequency of access set to "Draw"
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+
+    // write a simple vertex shader in glsl, and compile it dynamically in runtime
+
+    const char *vertexShaderSource = "#version 330 core\n"
+                                     "layout (location = 0) in vec3 aPos;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                     "}\0";
+    unsigned int vertexShader;
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    // check if shader is compiled successfully
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+                  << infoLog << std::endl;
+    }
+
+    glViewport(0, 0, 1920, 1080);
     redraw_window(window);
 
     while (!glfwWindowShouldClose(window))
@@ -49,4 +85,3 @@ int main()
     glfwTerminate();
     return 0;
 }
-
