@@ -72,6 +72,29 @@ int main()
                   << infoLog << std::endl;
     }
 
+    // create a fragment shader
+    const char *fragShaderSource = "#version 330 core\n"
+                                   "out vec4 FragColor;\n"
+                                   "void main() {"
+                                   "  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
+                                   "}";
+    // create and compile fragment shader
+    unsigned int fragShader; // store id of shader
+    fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragShader, 1, &fragShaderSource, NULL);
+    glCompileShader(fragShader);
+    // check if frag shader is setup correctly
+    int isFragSuccess;
+    char fragInfoLog[512];
+    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &isFragSuccess);
+    if (!isFragSuccess)
+    {
+        glGetShaderInfoLog(fragShader, 512, NULL, fragInfoLog);
+        std::cout << "Error frag shader not compiled successfully \n"
+                  << fragInfoLog << "\n"
+                  << std::endl;
+    };
+
     glViewport(0, 0, 1920, 1080);
     redraw_window(window);
 
