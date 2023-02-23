@@ -74,7 +74,7 @@ int main()
 
     // create a fragment shader
     const char *fragShaderSource = "#version 330 core\n"
-                                   "out vec4 FragColor;\n"
+                                   "out vec4 frag_colour;\n"
                                    "void main() {"
                                    "  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
                                    "}";
