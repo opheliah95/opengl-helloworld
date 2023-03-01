@@ -7,7 +7,6 @@ void redraw_window(GLFWwindow *window)
     // Rendering code goes here
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glfwSwapBuffers(window);
 }
 
 int main()
@@ -37,7 +36,6 @@ int main()
         0.0f, 0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         -0.5f, -0.5f, 0.0f};
-
     // create VBO to store point information into buffer
     unsigned int VBO;
     glGenBuffers(1, &VBO);
@@ -45,10 +43,17 @@ int main()
 
     // // send the buffer to graphics card
     // // step 1: initialize a buffer store to store array buffer data with frequency of access set to "Draw"
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
-    // write a simple vertex shader in glsl, and compile it dynamically in runtime
+    // need to map the buffer to vertex array
+    GLuint VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)0);
 
+    // write a simple vertex shader in glsl, and compile it dynamically in runtime
     const char *vertexShaderSource = "#version 330 core\n"
                                      "layout (location = 0) in vec3 aPos;\n"
                                      "void main()\n"
@@ -95,7 +100,6 @@ int main()
                   << std::endl;
     };
 
-
     // create a shader program
     unsigned int shaderProgram;        // id of shader program
     shaderProgram = glCreateProgram(); // create shader program
@@ -111,19 +115,27 @@ int main()
     {
         glGetProgramInfoLog(shaderProgram, 512, NULL, programInfoLog);
         std::cout << "Error shader program not compiled successfully \n"
-                  << programInfoLog << "\n" << std::endl;
+                  << programInfoLog << "\n"
+                  << std::endl;
     }
     // delete shader
     glDeleteShader(vertexShader);
     glDeleteShader(fragShader);
 
     glViewport(0, 0, 1920, 1080);
-    redraw_window(window);
+    // redraw_window(window);
 
     while (!glfwWindowShouldClose(window))
     {
+        /// wipe the drawing surface clear
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // use the gl programm we created to render object
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO); // binds VAO
+        // draw the trangle
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         glfwPollEvents();
-        redraw_window(window);
+        glfwSwapBuffers(window);
     }
 
     glfwDestroyWindow(window);
