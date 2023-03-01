@@ -95,6 +95,28 @@ int main()
                   << std::endl;
     };
 
+
+    // create a shader program
+    unsigned int shaderProgram;        // id of shader program
+    shaderProgram = glCreateProgram(); // create shader program
+    // attach both vertex  and fragment shader
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragShader);
+    glLinkProgram(shaderProgram);
+    // check if program is linked
+    GLint isLinkSuccess;
+    char programInfoLog[512];
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isLinkSuccess);
+    if (!success)
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, programInfoLog);
+        std::cout << "Error shader program not compiled successfully \n"
+                  << programInfoLog << "\n" << std::endl;
+    }
+    // delete shader
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragShader);
+
     glViewport(0, 0, 1920, 1080);
     redraw_window(window);
 
