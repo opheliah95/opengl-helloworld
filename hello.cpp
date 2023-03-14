@@ -9,14 +9,52 @@ void redraw_window(GLFWwindow *window)
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-int main()
+void init_window()
 {
     glfwInit();
     // glxinfo | grep "OpenGL version"
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+}
 
+void test_shader(unsigned int &shader)
+{
+    // check if shader is compiled successfully
+    int success;
+    char infoLog[512];
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(shader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+                  << infoLog << std::endl;
+    }
+    else
+    {
+        std::cout << "SUCCESS::SHADER " << shader << std::endl;
+    }
+}
+
+void test_program(unsigned int &shaderProgram) {
+    // check if program is linked
+    GLint isLinkSuccess;
+    char programInfoLog[512];
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isLinkSuccess);
+    if (!isLinkSuccess)
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, programInfoLog);
+        std::cout << "Error shader program not compiled successfully \n"
+                  << programInfoLog << "\n"
+                  << std::endl;
+    }
+}
+
+int main()
+{
+    // init window to use right version
+    init_window();
     // create a window
     GLFWwindow *window = glfwCreateWindow(1920, 1080, "Hello OpenGL", NULL, NULL);
 
@@ -66,17 +104,7 @@ int main()
     glCompileShader(vertexShader);
 
     // check if shader is compiled successfully
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-                  << infoLog << std::endl;
-    }
-
+    test_shader(vertexShader);
     // create a fragment shader
     const char *fragShaderSource = "#version 330 core\n"
                                    "out vec4 frag_colour;\n"
@@ -89,16 +117,7 @@ int main()
     glShaderSource(fragShader, 1, &fragShaderSource, NULL);
     glCompileShader(fragShader);
     // check if frag shader is setup correctly
-    int isFragSuccess;
-    char fragInfoLog[512];
-    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &isFragSuccess);
-    if (!isFragSuccess)
-    {
-        glGetShaderInfoLog(fragShader, 512, NULL, fragInfoLog);
-        std::cout << "Error frag shader not compiled successfully \n"
-                  << fragInfoLog << "\n"
-                  << std::endl;
-    };
+    test_shader(fragShader);
 
     // create a shader program
     unsigned int shaderProgram;        // id of shader program
@@ -107,17 +126,10 @@ int main()
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragShader);
     glLinkProgram(shaderProgram);
+    
     // check if program is linked
-    GLint isLinkSuccess;
-    char programInfoLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isLinkSuccess);
-    if (!success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, programInfoLog);
-        std::cout << "Error shader program not compiled successfully \n"
-                  << programInfoLog << "\n"
-                  << std::endl;
-    }
+    test_program(shaderProgram);
+
     // delete shader
     glDeleteShader(vertexShader);
     glDeleteShader(fragShader);
