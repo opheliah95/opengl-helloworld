@@ -37,7 +37,8 @@ void test_shader(unsigned int &shader)
     }
 }
 
-void test_program(unsigned int &shaderProgram) {
+void test_program(unsigned int &shaderProgram)
+{
     // check if program is linked
     GLint isLinkSuccess;
     char programInfoLog[512];
@@ -50,6 +51,20 @@ void test_program(unsigned int &shaderProgram) {
                   << std::endl;
     }
 }
+
+// write a simple vertex shader in glsl, and compile it dynamically in runtime
+const char *vertexShaderSource = "#version 330 core\n"
+                                 "layout (location = 0) in vec3 aPos;\n"
+                                 "void main()\n"
+                                 "{\n"
+                                 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                 "}\0";
+// create a fragment shader
+const char *fragShaderSource = "#version 330 core\n"
+                               "out vec4 frag_colour;\n"
+                               "void main() {"
+                               "  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
+                               "}";
 
 int main()
 {
@@ -69,35 +84,7 @@ int main()
     // init application
     gladLoadGL();
 
-    // trangle we want to render
-    float points[] = {
-        0.0f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f};
-    // create VBO to store point information into buffer
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind the vbo buffer
-
-    // // send the buffer to graphics card
-    // // step 1: initialize a buffer store to store array buffer data with frequency of access set to "Draw"
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-
-    // need to map the buffer to vertex array
-    GLuint VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)0);
-
-    // write a simple vertex shader in glsl, and compile it dynamically in runtime
-    const char *vertexShaderSource = "#version 330 core\n"
-                                     "layout (location = 0) in vec3 aPos;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                     "}\0";
+    // create vertex shader
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -105,12 +92,6 @@ int main()
 
     // check if shader is compiled successfully
     test_shader(vertexShader);
-    // create a fragment shader
-    const char *fragShaderSource = "#version 330 core\n"
-                                   "out vec4 frag_colour;\n"
-                                   "void main() {"
-                                   "  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
-                                   "}";
     // create and compile fragment shader
     unsigned int fragShader; // store id of shader
     fragShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -126,7 +107,7 @@ int main()
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragShader);
     glLinkProgram(shaderProgram);
-    
+
     // check if program is linked
     test_program(shaderProgram);
 
@@ -134,8 +115,38 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragShader);
 
+     // trangle we want to render
+    float points[] = {
+        // trangle 1
+        0.0f, 0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+
+        // trangle2
+        0.5f, -0.5f, 0.0f,
+        1.0f, 0.5f, 0.0f,
+        1.5f, -0.5f, 0.0f};
+
+    // create VBO and VAO into buffer
+    unsigned int VBO, VAO;
+    // need to map the data to vertex array
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // create VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind the vbo buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+
+     // vertex attribute that maps our vertex to vertex shader
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    glBindVertexArray(0); 
+
+
     glViewport(0, 0, 1920, 1080);
-    // redraw_window(window);
+
 
     while (!glfwWindowShouldClose(window))
     {
@@ -145,7 +156,7 @@ int main()
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO); // binds VAO
         // draw the trangle
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
