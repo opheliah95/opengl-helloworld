@@ -6,6 +6,10 @@ hello.o: hello.cpp
 
 rect.o: rect.cpp 
 	g++ ${GFLAGS} -o rect.o rect.cpp glad.c ${CFLAGS}
+
+two.o: two.cpp 
+	g++ ${GFLAGS} -o two.o two.cpp glad.c ${CFLAGS}
+
 clean: 
 	rm *.o
 
